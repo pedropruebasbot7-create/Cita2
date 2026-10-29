@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+{% block content %}
+<section class="section booking-page auth-page">
+  <div class="auth-grid">
+    <div class="auth-panel auth-info">
+      <span class="badge">Bienvenida</span>
+      <h1>Accede a tu cuenta y guarda tus compras</h1>
+      <p>Inicia sesión para revisar tu historial, completar el carrito y pagar con mayor rapidez.</p>
+      <ul class="checklist">
+        <li>✓ Compra más rápido</li>
+        <li>✓ Guarda tus datos de entrega</li>
+        <li>✓ Revisa tus pedidos en un solo lugar</li>
+      </ul>
+    </div>
+
+    <div class="auth-panel auth-form-panel">
+      {% if error %}
+        <div class="form-msg">{{ error }}</div>
+      {% endif %}
+
+      <div class="auth-tabs">
+        <a href="/login" class="auth-tab active">Iniciar sesión</a>
+        <a href="/login?register=1" class="auth-tab">Crear cuenta</a>
+      </div>
+
+      {% if request.args.get('register') == '1' %}
+        <form method="post" action="/login" class="auth-form">
+          <input type="hidden" name="mode" value="register">
+          <input type="hidden" name="next" value="{{ request.args.get('next') or '/carrito' }}">
+          <h3>Crear cuenta</h3>
+          <label>Nombre</label>
+          <input type="text" name="nombre" placeholder="Fernanda López" required>
+
+          <label>Email</label>
+          <input type="email" name="email" placeholder="tucorreo@email.com" required>
+
+          <label>Teléfono</label>
+          <input type="tel" name="telefono" placeholder="+52 ...">
+
+          <label>Dirección</label>
+          <input type="text" name="direccion" placeholder="Calle ...">
+
+          <label>Contraseña</label>
+          <input type="password" name="password" placeholder="Mínimo 6 caracteres" required>
+
+          <button type="submit" class="btn-primary full" style="margin-top:16px;">Registrarme</button>
+        </form>
+      {% else %}
+        <form method="post" action="/login" class="auth-form">
+          <input type="hidden" name="mode" value="login">
+          <input type="hidden" name="next" value="{{ request.args.get('next') or '/carrito' }}">
+          <h3>Iniciar sesión</h3>
+          <label>Email</label>
+          <input type="email" name="email" placeholder="tucorreo@email.com" required>
+
+          <label>Contraseña</label>
+          <input type="password" name="password" placeholder="••••••••" required>
+
+          <button type="submit" class="btn-primary full" style="margin-top:16px;">Entrar</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}

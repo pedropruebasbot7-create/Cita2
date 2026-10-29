@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Umbra Beauty Studio{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-wrap">
+      <a href="/" class="logo">Umbra <span>Beauty</span></a>
+      <div class="nav-links">
+        <a href="/" class="nav-link">Inicio</a>
+        <a href="/#servicios" class="nav-link">Servicios</a>
+        <a href="/tienda" class="nav-link">Tienda</a>
+        <a href="/agendar" class="nav-link">Agendar</a>
+        <a href="/carrito" class="nav-link cart-link">Carrito <span class="cart-badge" data-cart-count>0</span></a>
+        {% if session.get('user_id') %}
+          <div class="nav-user-pill">
+            <span class="nav-user-avatar">{{ (session.get('user_name', 'Cliente') or 'Cliente')[:1] | upper }}</span>
+            <span class="nav-user-name">{{ session.get('user_name', 'Cliente') }}</span>
+          </div>
+          <a href="/logout" class="nav-link">Cerrar sesión</a>
+        {% else %}
+          <a href="/login" class="nav-user-pill profile-link" aria-label="Ir al perfil">
+            <span class="nav-user-avatar">P</span>
+            <span class="nav-user-name">Perfil</span>
+          </a>
+        {% endif %}
+        <a href="/admin" class="btn-pink admin-link">Admin</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <h4>Umbra Beauty Studio</h4>
+        <p>Estética, belleza y atención boutique en Playa del Carmen.</p>
+      </div>
+      <div>
+        <h5>Horario</h5>
+        <small>Lun - Sab: 10:00 - 20:00</small>
+      </div>
+      <div>
+        <h5>Contacto</h5>
+        <small>WhatsApp +52 984 123 4567</small>
+      </div>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+  <script src="/static/js/main.js"></script>
+</body>
+</html>

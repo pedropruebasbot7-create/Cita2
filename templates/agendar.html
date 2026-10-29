@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Agendar cita{% endblock %}
+{% block content %}
+<section class="section booking-page">
+  <div class="booking-wrap">
+    <div class="booking-info">
+      <span class="badge">Reserva tu cita</span>
+      <h1>Ponemos tu belleza en horario perfecto</h1>
+      <p>Agenda desde tu servicio favorito y te confirmamos la mejor hora disponible.</p>
+      <ul class="checklist">
+        <li>✓ Atención personalizada</li>
+        <li>✓ Fecha y hora a tu elección</li>
+        <li>✓ Citas para pestañas, uñas, cejas y más</li>
+      </ul>
+      <div class="mini-calendar">Lunes a sábado · 10:00 a 20:00</div>
+    </div>
+
+    <div class="form-card">
+      <form method="post" action="/agendar">
+        <label>Servicio</label>
+        <select name="servicio_id" required>
+          {% for s in servicios %}
+            <option value="{{ s['id'] }}" {% if request.args.get('servicio')|int == s['id'] %}selected{% endif %}>{{ s['nombre'] }} — ${{ s['precio']|int }} MXN</option>
+          {% endfor %}
+        </select>
+
+        <div class="row2">
+          <div>
+            <label>Fecha</label>
+            <input type="date" name="fecha" required>
+          </div>
+          <div>
+            <label>Hora</label>
+            <input type="time" name="hora" min="10:00" max="20:00" required>
+          </div>
+        </div>
+
+        <label>Tu nombre</label>
+        <input type="text" name="cliente_nombre" placeholder="Ej: Fernanda López" required>
+
+        <div class="row2">
+          <div>
+            <label>Email</label>
+            <input type="email" name="cliente_email" placeholder="tucorreo@email.com">
+          </div>
+          <div>
+            <label>WhatsApp</label>
+            <input type="tel" name="cliente_telefono" placeholder="+52 ..." required>
+          </div>
+        </div>
+
+        <label>Notas adicionales</label>
+        <textarea name="notas" placeholder="Cuéntanos si quieres un estilo o detalle especial"></textarea>
+
+        <button type="submit" class="btn-primary full" style="margin-top:16px;">Confirmar cita</button>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

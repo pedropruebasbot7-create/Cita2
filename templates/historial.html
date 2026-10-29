@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Historial{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head row">
+    <div>
+      <h2>Historial</h2>
+      <p>Agenda y pedidos recientes.</p>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="citas">Citas</button>
+    <button class="tab" data-tab="pedidos">Pedidos</button>
+  </div>
+
+  <div id="tab-citas" class="tab-content active">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>Cliente</th>
+          <th>Servicio</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in citas %}
+        <tr>
+          <td>{{ c['fecha'] }} {{ c['hora'] }}</td>
+          <td>{{ c['cliente_nombre'] }}</td>
+          <td>{{ c['servicio_nombre'] or 'Sin servicio' }}</td>
+          <td><span class="badge-status {{ c['estado'] }}">{{ c['estado'] }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No hay citas registradas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div id="tab-pedidos" class="tab-content">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Cliente</th>
+          <th>Total</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr>
+          <td>#{{ p['id'] }}</td>
+          <td>{{ p['cliente_nombre'] }}</td>
+          <td>${{ "%.0f"|format(p['total']) }}</td>
+          <td><span class="badge-status {{ p['estado'] }}">{{ p['estado'] }}</span></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No hay pedidos registrados.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.tab').forEach((button) => {
+  button.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach((tab) => tab.classList.remove('active'));
+    button.classList.add('active');
+    document.getElementById('tab-' + button.dataset.tab).classList.add('active');
+  });
+});
+</script>
+{% endblock %}

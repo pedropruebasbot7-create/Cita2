@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Carrito{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head row">
+    <div>
+      <h2>Mi carrito</h2>
+      <p>Revisa tus artículos antes de pagar.</p>
+    </div>
+    <a href="/tienda" class="btn-ghost">Seguir comprando</a>
+  </div>
+
+  <div class="checkout-grid">
+    <div class="cart-list">
+      <h3>Productos seleccionados</h3>
+      <div data-cart-items></div>
+      <div class="cart-item" style="padding-top:16px; border-bottom:none; font-size:14px;">
+        <strong>Total estimado</strong>
+        <strong data-cart-total>$0</strong>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <h3>Datos de entrega y pago</h3>
+      <form id="checkout-form">
+        <label>Nombre</label>
+        <input type="text" name="cliente_nombre" value="{{ session.get('user_name', '') }}" placeholder="Tu nombre completo" required>
+
+        <div class="row2">
+          <div>
+            <label>Email</label>
+            <input type="email" name="cliente_email" value="{{ session.get('user_email', '') }}" placeholder="correo@ejemplo.com">
+          </div>
+          <div>
+            <label>Teléfono</label>
+            <input type="tel" name="cliente_telefono" placeholder="+52 984 ..." required>
+          </div>
+        </div>
+
+        <label>Dirección</label>
+        <input type="text" name="direccion" placeholder="Calle, número, colonia" required>
+
+        <label>Método de pago</label>
+        <select name="metodo_pago" id="metodo_pago">
+          <option value="tarjeta">Tarjeta</option>
+          <option value="transferencia">Transferencia</option>
+          <option value="efectivo">Efectivo</option>
+        </select>
+
+        <div id="card-fields">
+          <label>Titular de la tarjeta</label>
+          <input type="text" name="titular_tarjeta" placeholder="Nombre del titular">
+
+          <div class="row2">
+            <div>
+              <label>Número de tarjeta</label>
+              <input type="text" name="numero_tarjeta" inputmode="numeric" placeholder="1234 5678 9012 3456">
+            </div>
+            <div>
+              <label>Expiración</label>
+              <input type="text" name="expiracion" placeholder="MM/AA">
+            </div>
+          </div>
+
+          <label>CVV</label>
+          <input type="password" name="cvv" maxlength="4" placeholder="123">
+        </div>
+
+        <label>Notas</label>
+        <textarea name="observaciones" placeholder="Detalles adicionales del pedido"></textarea>
+
+        <button type="submit" class="btn-primary full" style="margin-top:16px;">Procesar pago</button>
+        <div class="form-msg" data-checkout-msg></div>
+      </form>
+    </div>
+  </div>
+</section>
+{% endblock %}

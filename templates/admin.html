@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}Admin - Umbra{% endblock %}
+{% block content %}
+<section class="section admin">
+  <div class="section-head row"><h1>Panel Administracion</h1><a href="/admin/logout" class="btn-ghost">Salir</a></div>
+  <div class="stats-grid">
+    <div class="stat"><b>{{ stats.citas }}</b><span>Total Citas</span></div>
+    <div class="stat"><b>{{ stats.pendientes }}</b><span>Pendientes</span></div>
+    <div class="stat"><b>${{ stats.ingresos|int }}</b><span>Ingresos Tienda</span></div>
+    <div class="stat"><b>{{ stats.productos }}</b><span>Productos</span></div>
+    <div class="stat"><b>{{ stats.pedidos }}</b><span>Pedidos</span></div>
+  </div>
+
+  <div class="tabs"><button class="tab active" data-tab="citas">Citas / Agenda</button><button class="tab" data-tab="servicios">Servicios</button><button class="tab" data-tab="productos">Productos / Tienda</button><button class="tab" data-tab="pedidos">Pedidos</button></div>
+
+  <div id="tab-citas" class="tab-content active">
+    <h3>Agenda de Citas</h3><div id="citasAdmin"></div>
+  </div>
+
+  <div id="tab-servicios" class="tab-content">
+    <h3>Servicios</h3><button class="btn-small" onclick="openServicioModal(0)">+ Nuevo Servicio</button><div id="serviciosAdmin"></div>
+  </div>
+
+  <div id="tab-productos" class="tab-content">
+    <h3>Productos</h3><button class="btn-small" onclick="openProductoModal(0)">+ Nuevo Producto</button><div id="productosAdmin"></div>
+  </div>
+
+  <div id="tab-pedidos" class="tab-content">
+    <h3>Pedidos Tienda</h3><div id="pedidosAdmin"></div>
+  </div>
+</section>
+
+<div id="modal" class="modal hidden"><div class="modal-box"><span id="modalClose" class="close">&times;</span><div id="modalContent"></div></div></div>
+{% endblock %}
+{% block scripts %}
+<script>
+const $ = s=>document.querySelector(s);
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click', ()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+ document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active'); document.getElementById('tab-'+b.dataset.tab).classList.add('active');
+}));
+
+async function loadAll(){
+  const [citas, servicios, productos, pedidos] = await Promise.all([
+    fetch('/api/citas').then(r=>r.json()),
+    fetch('/api/servicios').then(r=>r.json()),
+    fetch('/api/productos').then(r=>r.json()),
+    fetch('/api/pedidos').then(r=>r.json())
+  ]);
+  renderCitas(citas); renderServicios(servicios); renderProductos(productos); renderPedidos(pedidos);
+}
+function renderCitas(list){
+  let h='<table class="table"><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Hora</th><th>Estado</th><th>Accion</th></tr>';
+  list.forEach(c=>{ h+=`<tr><td>${c.fecha}</td><td>${c.cliente_nombre}<br><small>${c.cliente_telefono}</small></td><td>${c.servicio}</td><td>${c.hora}</td>
+  <td><select onchange="updateCita(${c.id}, this.value)"><option ${c.estado=='pendiente'?'selected':''}>pendiente</option><option ${c.estado=='confirmada'?'selected':''}>confirmada</option><option ${c.estado=='completada'?'selected':''}>completada</option><option ${c.estado=='cancelada'?'selected':''}>cancelada</option></select></td>
+  <td><button onclick="delCita(${c.id})">Eliminar</button></td></tr>`; });
+  h+='</table>'; document.getElementById('citasAdmin').innerHTML=h;
+}
+function renderServicios(list){
+  let h='<div class="grid mini">'; list.forEach(s=>{ h+=`<div class="card"><img src="${s.imagen}"><div class="card-body"><h3>${s.nombre}</h3><small>${s.categoria} • ${s.duracion}min</small><p>$${s.precio}</p><button class="btn-small" onclick="openServicioModal(${s.id})">Editar</button> <button class="btn-small" onclick="delServicio(${s.id})">Eliminar</button></div></div>`; }); h+='</div>'; document.getElementById('serviciosAdmin').innerHTML=h; window._servicios=list;
+}
+function renderProductos(list){
+  let h='<div class="grid mini">'; list.forEach(p=>{ h+=`<div class="card"><img src="${p.imagen}"><div class="card-body"><h3>${p.nombre}</h3><small>${p.categoria} • stock ${p.stock}</small><p>$${p.precio}</p><button class="btn-small" onclick="openProductoModal(${p.id})">Editar</button> <button class="btn-small" onclick="delProducto(${p.id})">Eliminar</button></div></div>`; }); h+='</div>'; document.getElementById('productosAdmin').innerHTML=h; window._productos=list;
+}
+function renderPedidos(list){
+  let h='<table class="table"><tr><th>ID</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Accion</th></tr>';
+  list.forEach(p=>{ h+=`<tr><td>#${p.id}</td><td>${p.cliente_nombre}</td><td>$${p.total}</td><td><select onchange="updatePedido(${p.id}, this.value)"><option ${p.estado=='pendiente'?'selected':''}>pendiente</option><option ${p.estado=='enviado'?'selected':''}>enviado</option><option ${p.estado=='entregado'?'selected':''}>entregado</option><option ${p.estado=='cancelado'?'selected':''}>cancelado</option></select></td><td>${p.fecha_creacion}</td></tr>`; }); h+='</table>'; document.getElementById('pedidosAdmin').innerHTML=h;
+}
+async function updateCita(id, estado){ await fetch('/api/citas/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({estado})}); }
+async function delCita(id){ if(confirm('Eliminar cita?')){ await fetch('/api/citas/'+id, {method:'DELETE'}); loadAll(); } }
+async function updatePedido(id, estado){ await fetch('/api/pedidos/'+id, {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({estado})}); }
+async function uploadImageFile(file, targetInputId, previewTargetId){
+  if (!file) return;
+  const formData = new FormData();
+  formData.append('image', file);
+  const res = await fetch('/api/images', {method:'POST', body: formData});
+  const data = await res.json();
+  if (!res.ok || !data.url) {
+    throw new Error(data.error || 'No se pudo subir la imagen');
+  }
+  const url = data.url;
+  const target = document.getElementById(targetInputId);
+  if (target) target.value = url;
+  const preview = document.getElementById(previewTargetId);
+  if (preview) preview.innerHTML = `<img class="preview-image" src="${url}" alt="Preview">`;
+  return url;
+}
+function bindImageUpload(inputId, targetInputId, previewId){
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.addEventListener('change', async (event) => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    try {
+      await uploadImageFile(file, targetInputId, previewId);
+    } catch (error) {
+      alert(error.message || 'Error al subir la imagen');
+      input.value = '';
+    }
+  });
+  const trigger = document.getElementById(inputId + 'Trigger');
+  if (trigger) {
+    trigger.onclick = () => input.click();
+  }
+}
+function openProductoModal(id){
+  const p = (window._productos||[]).find(x=>x.id==id) || {id:0,nombre:'',categoria:'maquillaje',precio:0,stock:20,descripcion:'',imagen:''};
+  const previewHtml = p.imagen ? `<img class="preview-image" src="${p.imagen}" alt="Preview">` : '';
+  document.getElementById('modalContent').innerHTML=`<div class="modal-form"><h3>${id==0?'Nuevo':'Editar'} Producto</h3>
+  <input id="pn" placeholder="Nombre" value="${p.nombre}"><input id="pc" placeholder="Categoria" value="${p.categoria}">
+  <div class="modal-row"><input id="pp" type="number" placeholder="Precio" value="${p.precio}"><input id="ps" type="number" placeholder="Stock" value="${p.stock}"></div>
+  <div class="modal-row"><input id="pi" placeholder="URL Imagen" value="${p.imagen}"><input id="imgProductFile" type="file" accept="image/*" style="display:none"></div>
+  <button id="imgProductFileTrigger" class="btn-small" type="button">Elegir imagen desde archivos</button>
+  <div id="piPreview">${previewHtml}</div>
+  <textarea id="pd" placeholder="Descripción">${p.descripcion}</textarea>
+  <button class="btn-primary full" onclick="saveProducto(${id})">Guardar</button></div>`;
+  bindImageUpload('imgProductFile', 'pi', 'piPreview');
+  document.getElementById('modal').classList.remove('hidden');
+}
+function openServicioModal(id){
+  const s = (window._servicios||[]).find(x=>x.id==id) || {id:0,nombre:'',categoria:'pestañas',duracion:60,precio:0,descripcion:'',imagen:''};
+  const previewHtml = s.imagen ? `<img class="preview-image" src="${s.imagen}" alt="Preview">` : '';
+  document.getElementById('modalContent').innerHTML=`<div class="modal-form"><h3>${id==0?'Nuevo':'Editar'} Servicio</h3>
+  <input id="sn" placeholder="Nombre" value="${s.nombre}"><div class="modal-row"><input id="sc" placeholder="Categoria" value="${s.categoria}"><input id="sd" type="number" placeholder="Duración min" value="${s.duracion}"></div>
+  <div class="modal-row"><input id="sp" type="number" placeholder="Precio" value="${s.precio}"><input id="si" placeholder="URL Imagen" value="${s.imagen}"></div>
+  <input id="imgServiceFile" type="file" accept="image/*" style="display:none">
+  <button id="imgServiceFileTrigger" class="btn-small" type="button">Elegir imagen desde archivos</button>
+  <div id="siPreview">${previewHtml}</div>
+  <textarea id="sde" placeholder="Descripción">${s.descripcion}</textarea>
+  <button class="btn-primary full" onclick="saveServicio(${id})">Guardar</button></div>`;
+  bindImageUpload('imgServiceFile', 'si', 'siPreview');
+  document.getElementById('modal').classList.remove('hidden');
+}
+async function saveProducto(id){
+  const data={nombre:document.getElementById('pn').value,categoria:document.getElementById('pc').value,precio:parseFloat(document.getElementById('pp').value),stock:parseInt(document.getElementById('ps').value),descripcion:document.getElementById('pd').value,imagen:document.getElementById('pi').value};
+  await fetch('/api/productos/'+id, {method: id==0?'POST':'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); document.getElementById('modal').classList.add('hidden'); loadAll();
+}
+async function saveServicio(id){
+  const data={id,nombre:document.getElementById('sn').value,categoria:document.getElementById('sc').value,duracion:parseInt(document.getElementById('sd').value),precio:parseFloat(document.getElementById('sp').value),descripcion:document.getElementById('sde').value,imagen:document.getElementById('si').value};
+  await fetch('/api/servicios', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)}); document.getElementById('modal').classList.add('hidden'); loadAll();
+}
+async function delProducto(id){ if(confirm('Eliminar?')){ await fetch('/api/productos/'+id,{method:'DELETE'}); loadAll(); } }
+async function delServicio(id){ if(confirm('Eliminar?')){ await fetch('/api/servicios/'+id,{method:'DELETE'}); loadAll(); } }
+document.getElementById('modalClose').onclick=()=>document.getElementById('modal').classList.add('hidden');
+loadAll();
+</script>
+{% endblock %}

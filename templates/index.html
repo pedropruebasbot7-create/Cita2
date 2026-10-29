@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="hero-text">
+    <span class="badge">Nuevo — Keratina + Acripie en combo</span>
+    <h1>Donde tus <em>pestañas</em> hablan y tus <em>uñas</em> brillan</h1>
+    <p>Estudio boutique en Playa del Carmen especializado en pestañas, uñas acrílicas, cejas HD, acripie y keratinas brasileñas. + productos pro para llevarte el salón a casa.</p>
+    <div class="hero-ctas">
+      <a href="/agendar" class="btn-primary">Reservar ahora →</a>
+      <a href="/tienda" class="btn-ghost">Ver tienda de maquillaje</a>
+    </div>
+    <div class="stats">
+      <div><strong>+2,400</strong><span>clientas felices</span></div>
+      <div><strong>4.9★</strong><span>en Instagram</span></div>
+      <div><strong>6</strong><span>especialidades</span></div>
+    </div>
+  </div>
+  <div class="hero-image">
+    <div class="img-card"><img src="/static/uploads/pestañas-falsas-mujer-hermosa-con-la-cara-del-maquillaje-y-de-la-belleza-90869383.webp" alt="beauty"></div>
+    <div class="floating-card fc1"><b>Hoy — 3 citas libres</b><small>¡Agenda antes de las 6pm!</small></div>
+    <div class="floating-card fc2">Gelish 21 días</div>
+  </div>
+</section>
+
+<section id="servicios" class="section">
+  <div class="section-head">
+    <h2>Nuestros Servicios Estrella</h2>
+    <p>Todo lo que necesitas para estar impecable de pies a cabeza</p>
+  </div>
+  <div class="filters">
+    <button class="filter active" data-filter="all">Todo</button>
+    <button class="filter" data-filter="pestañas">Pestañas</button>
+    <button class="filter" data-filter="uñas">Uñas</button>
+    <button class="filter" data-filter="cejas">Cejas</button>
+    <button class="filter" data-filter="acripie">Acripie</button>
+    <button class="filter" data-filter="keratina">Keratinas</button>
+  </div>
+  <div class="grid">
+    {% for s in servicios %}
+    <div class="card service" data-cat="{{ s['categoria'] }}">
+      <img src="{{ s['imagen'] }}" alt="{{ s['nombre'] }}">
+      <div class="card-body">
+        <span class="cat">{{ s['categoria'] }} • {{ s['duracion'] }}min</span>
+        <h3>{{ s['nombre'] }}</h3>
+        <p>{{ s['descripcion'] }}</p>
+        <div class="card-foot">
+          <strong>${{ "%.0f"|format(s['precio']) }} MXN</strong>
+          <a href="/agendar?servicio={{ s['id'] }}" class="btn-small">Agendar</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section pink">
+  <div class="section-head">
+    <h2>Tienda Umbra — Llévate el salón a casa</h2>
+    <p>Maquillaje, barnices OPI, Gelish, cuidado de pestañas y kits pro</p>
+  </div>
+  <div class="grid mini">
+    {% for p in productos %}
+    <div class="card product">
+      <img src="{{ p['imagen'] }}" alt="{{ p['nombre'] }}">
+      <div class="card-body">
+        <span class="cat">{{ p['categoria'] }}</span>
+        <h3>{{ p['nombre'] }}</h3>
+        <p class="price">${{ "%.0f"|format(p['precio']) }}</p>
+        <button class="btn-small full add-cart" data-id="{{ p['id'] }}" data-nombre="{{ p['nombre'] }}" data-precio="{{ p['precio'] }}" data-imagen="{{ p['imagen'] }}">+ Añadir</button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <a href="/tienda" class="btn-primary center">Ver toda la tienda</a>
+</section>
+
+<section class="section testimonials">
+  <h2>Ellas ya brillaron</h2>
+  <div class="testi-grid">
+    <div class="testi">"Mis pestañas duraron 4 semanas intactas, amo Umbra" — <b>Valeria G.</b></div>
+    <div class="testi">"El acripie es lo mejor, salí caminando en nubes" — <b>Jimena R.</b></div>
+    <div class="testi">"Mi keratina me dejó el pelo liso sin plancha" — <b>Ana P.</b></div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.querySelectorAll('.filter').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filter = btn.dataset.filter;
+    document.querySelectorAll('.card.service').forEach((card) => {
+      const matches = filter === 'all' || card.dataset.cat === filter;
+      card.style.display = matches ? 'block' : 'none';
+    });
+  });
+});
+</script>
+{% endblock %}

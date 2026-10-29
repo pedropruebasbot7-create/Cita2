@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Tienda Umbra{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="section-head">
+    <h2>Tienda Umbra</h2>
+    <p>Maquillaje, barnices, cuidado y kits profesionales para llevarte el salón a casa.</p>
+  </div>
+
+  <div class="grid">
+    {% for p in productos %}
+    <div class="card product">
+      <img src="{{ p['imagen'] }}" alt="{{ p['nombre'] }}">
+      <div class="card-body">
+        <span class="cat">{{ p['categoria'] }}</span>
+        <h3>{{ p['nombre'] }}</h3>
+        <p>{{ p['descripcion'] }}</p>
+        <div class="card-foot">
+          <strong class="price">${{ "%.0f"|format(p['precio']) }}</strong>
+          <button class="btn-small add-cart" data-id="{{ p['id'] }}" data-nombre="{{ p['nombre'] }}" data-precio="{{ p['precio'] }}" data-imagen="{{ p['imagen'] }}">Añadir</button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
